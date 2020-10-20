@@ -10,9 +10,6 @@ namespace Spryker\Client\Shipment;
 use Spryker\Client\Kernel\AbstractDependencyProvider;
 use Spryker\Client\Kernel\Container;
 
-/**
- * @method \Spryker\Client\Shipment\ShipmentConfig getConfig()
- */
 class ShipmentDependencyProvider extends AbstractDependencyProvider
 {
     public const SERVICE_ZED = 'zed service';
@@ -25,13 +22,13 @@ class ShipmentDependencyProvider extends AbstractDependencyProvider
      */
     public function provideServiceLayerDependencies(Container $container)
     {
-        $container->set(static::SESSION, function (Container $container) {
+        $container[self::SESSION] = function (Container $container) {
             return $container->getLocator()->session()->client();
-        });
+        };
 
-        $container->set(static::SERVICE_ZED, function (Container $container) {
+        $container[self::SERVICE_ZED] = function (Container $container) {
             return $container->getLocator()->zedRequest()->client();
-        });
+        };
 
         return $container;
     }

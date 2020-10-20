@@ -8,7 +8,6 @@
 namespace Spryker\Client\Shipment\Zed;
 
 use Generated\Shared\Transfer\QuoteTransfer;
-use Generated\Shared\Transfer\ShipmentMethodsCollectionTransfer;
 use Spryker\Client\ZedRequest\ZedRequestClient;
 
 class ShipmentStub implements ShipmentStubInterface
@@ -29,26 +28,13 @@ class ShipmentStub implements ShipmentStubInterface
     /**
      * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
      *
-     * @return \Generated\Shared\Transfer\ShipmentMethodsCollectionTransfer
+     * @return \Generated\Shared\Transfer\ShipmentMethodsTransfer
      */
-    public function getAvailableMethodsByShipment(QuoteTransfer $quoteTransfer): ShipmentMethodsCollectionTransfer
+    public function getAvailableMethods(QuoteTransfer $quoteTransfer)
     {
-        /** @var \Generated\Shared\Transfer\ShipmentMethodsCollectionTransfer $shipmentMethodsCollectionTransfer */
-        $shipmentMethodsCollectionTransfer = $this->zedStub->call('/shipment/gateway/get-available-methods-by-shipment', $quoteTransfer);
+        /** @var \Generated\Shared\Transfer\ShipmentMethodsTransfer $shipmentMethodTransfer */
+        $shipmentMethodTransfer = $this->zedStub->call('/shipment/gateway/get-available-methods', $quoteTransfer);
 
-        return $shipmentMethodsCollectionTransfer;
-    }
-
-    /**
-     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
-     *
-     * @return \Generated\Shared\Transfer\QuoteTransfer
-     */
-    public function expandQuoteWithShipmentGroups(QuoteTransfer $quoteTransfer): QuoteTransfer
-    {
-        /** @var \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer */
-        $quoteTransfer = $this->zedStub->call('/shipment/gateway/expand-quote-with-shipment-groups', $quoteTransfer);
-
-        return $quoteTransfer;
+        return $shipmentMethodTransfer;
     }
 }

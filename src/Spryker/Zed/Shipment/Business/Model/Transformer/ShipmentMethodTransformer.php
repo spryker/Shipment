@@ -28,7 +28,7 @@ class ShipmentMethodTransformer implements ShipmentMethodTransformerInterface
     protected $currencyFacade;
 
     /**
-     * @var array Keys are currency ISO codes, values are Currency transfer object data in array format.
+     * @var array Keys are currency iso codes, values are Currency transfer object data in array format.
      */
     protected static $currencyCache = [];
 
@@ -104,7 +104,7 @@ class ShipmentMethodTransformer implements ShipmentMethodTransformerInterface
     {
         /** @var \Orm\Zed\Shipment\Persistence\SpyShipmentCarrier|null $shipmentCarrierEntity */
         $shipmentCarrierEntity = $shipmentMethodEntity->getShipmentCarrier();
-        if ($shipmentCarrierEntity === null) {
+        if (!$shipmentCarrierEntity) {
             return null;
         }
 

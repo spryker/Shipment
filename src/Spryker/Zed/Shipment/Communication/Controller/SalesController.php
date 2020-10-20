@@ -7,7 +7,6 @@
 
 namespace Spryker\Zed\Shipment\Communication\Controller;
 
-use Spryker\Shared\Shipment\ShipmentConfig;
 use Spryker\Zed\Kernel\Communication\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -26,16 +25,8 @@ class SalesController extends AbstractController
      */
     public function listAction(Request $request)
     {
-        /** @var \Generated\Shared\Transfer\OrderTransfer $orderTransfer */
-        $orderTransfer = $request->request->get('orderTransfer');
-
-        $shipmentGroups = $this->getFactory()->getShipmentService()->groupItemsByShipment($orderTransfer->getItems());
-
         return $this->viewResponse([
-            'shipmentGroups' => $shipmentGroups,
-            'order' => $orderTransfer,
-            'currencyIsoCode' => $orderTransfer->getCurrencyIsoCode(),
-            'shipmentExpenseType' => ShipmentConfig::SHIPMENT_EXPENSE_TYPE,
+            'order' => $request->request->get('orderTransfer'),
         ]);
     }
 }

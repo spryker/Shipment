@@ -4,13 +4,10 @@
  * Copyright © 2016-present Spryker Systems GmbH. All rights reserved.
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
-
 namespace SprykerTest\Shared\Shipment\Helper;
 
 use Codeception\Module;
 use Generated\Shared\DataBuilder\ShipmentCarrierBuilder;
-use Generated\Shared\Transfer\ShipmentCarrierTransfer;
-use Spryker\Zed\Shipment\Business\ShipmentFacadeInterface;
 use SprykerTest\Shared\Testify\Helper\LocatorHelperTrait;
 
 class ShipmentCarrierDataHelper extends Module
@@ -22,10 +19,10 @@ class ShipmentCarrierDataHelper extends Module
      *
      * @return \Generated\Shared\Transfer\ShipmentCarrierTransfer
      */
-    public function haveShipmentCarrier(array $override = []): ShipmentCarrierTransfer
+    public function haveShipmentCarrier(array $override = [])
     {
         /** @var \Generated\Shared\Transfer\ShipmentCarrierTransfer $shipmentCarrierTransfer */
-        $shipmentCarrierTransfer = (new ShipmentCarrierBuilder($override))->build();
+        $shipmentCarrierTransfer = (new ShipmentCarrierBuilder($override));
         $shipmentCarrierTransfer->setIdShipmentCarrier(
             $this->getShipmentFacade()->createCarrier($shipmentCarrierTransfer)
         );
@@ -36,7 +33,7 @@ class ShipmentCarrierDataHelper extends Module
     /**
      * @return \Spryker\Zed\Shipment\Business\ShipmentFacadeInterface
      */
-    protected function getShipmentFacade(): ShipmentFacadeInterface
+    protected function getShipmentFacade()
     {
         return $this->getLocator()->shipment()->facade();
     }

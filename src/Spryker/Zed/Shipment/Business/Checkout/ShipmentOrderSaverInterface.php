@@ -10,9 +10,6 @@ namespace Spryker\Zed\Shipment\Business\Checkout;
 use Generated\Shared\Transfer\QuoteTransfer;
 use Generated\Shared\Transfer\SaveOrderTransfer;
 
-/**
- * @deprecated Use {@link \Spryker\Zed\Shipment\Business\Checkout\MultiShipmentOrderSaverInterface} instead
- */
 interface ShipmentOrderSaverInterface
 {
     /**

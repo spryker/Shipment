@@ -12,8 +12,6 @@ use Spryker\Zed\Calculation\Dependency\Plugin\CalculatorPluginInterface;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 
 /**
- * @deprecated Use {@link \Spryker\Zed\Shipment\Communication\Plugin\Calculation\ShipmentTaxRateCalculatorPlugin} instead.
- *
  * @method \Spryker\Zed\Shipment\Business\ShipmentFacadeInterface getFacade()
  * @method \Spryker\Zed\Shipment\Communication\ShipmentCommunicationFactory getFactory()
  * @method \Spryker\Zed\Shipment\ShipmentConfig getConfig()
@@ -22,19 +20,16 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 class ShipmentTaxRateCalculatorPlugin extends AbstractPlugin implements CalculatorPluginInterface
 {
     /**
-     * {@inheritDoc}
      * This plugin makes calculations based on the given quote. The result is added to the quote.
      *
      * @api
      *
      * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
      *
-     * @return \Generated\Shared\Transfer\QuoteTransfer
+     * @return void
      */
     public function recalculate(QuoteTransfer $quoteTransfer)
     {
         $this->getFacade()->calculateShipmentTaxRate($quoteTransfer);
-        
-        return $quoteTransfer;
     }
 }

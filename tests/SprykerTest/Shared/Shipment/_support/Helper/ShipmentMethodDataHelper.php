@@ -4,7 +4,6 @@
  * Copyright © 2016-present Spryker Systems GmbH. All rights reserved.
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
-
 namespace SprykerTest\Shared\Shipment\Helper;
 
 use ArrayObject;
@@ -12,14 +11,6 @@ use Codeception\Module;
 use Generated\Shared\DataBuilder\MoneyValueBuilder;
 use Generated\Shared\DataBuilder\ShipmentMethodBuilder;
 use Generated\Shared\Transfer\ShipmentMethodTransfer;
-use Generated\Shared\Transfer\StoreRelationTransfer;
-use Orm\Zed\Shipment\Persistence\SpyShipmentCarrierQuery;
-use Orm\Zed\Shipment\Persistence\SpyShipmentMethodPriceQuery;
-use Orm\Zed\Shipment\Persistence\SpyShipmentMethodQuery;
-use Orm\Zed\Shipment\Persistence\SpyShipmentMethodStoreQuery;
-use Spryker\Zed\Currency\Business\CurrencyFacadeInterface;
-use Spryker\Zed\Shipment\Business\ShipmentFacadeInterface;
-use Spryker\Zed\Store\Business\StoreFacadeInterface;
 use SprykerTest\Shared\Testify\Helper\LocatorHelperTrait;
 
 class ShipmentMethodDataHelper extends Module
@@ -30,7 +21,7 @@ class ShipmentMethodDataHelper extends Module
 
     /**
      * First level key represents store name.
-     * Second level key represents currency ISO code.
+     * Second level key represents currency iso code.
      * Second level value represents the optional corresponding MoneyValue transfer object override values.
      */
     public const DEFAULT_PRICE_LIST = [
@@ -45,7 +36,7 @@ class ShipmentMethodDataHelper extends Module
     protected static $idStoreCache = null;
 
     /**
-     * @var int[] Keys are currency ISO codes, values are currency ids.
+     * @var int[] Keys are currency iso codes, values are currency ids.
      */
     protected static $idCurrencyCache = [];
 
@@ -53,16 +44,11 @@ class ShipmentMethodDataHelper extends Module
      * @param array $overrideShipmentMethod
      * @param array $overrideCarrier
      * @param array $priceList
-     * @param array $idStoreList
      *
      * @return \Generated\Shared\Transfer\ShipmentMethodTransfer
      */
-    public function haveShipmentMethod(
-        array $overrideShipmentMethod = [],
-        array $overrideCarrier = [],
-        array $priceList = self::DEFAULT_PRICE_LIST,
-        array $idStoreList = []
-    ): ShipmentMethodTransfer {
+    public function haveShipmentMethod(array $overrideShipmentMethod = [], array $overrideCarrier = [], array $priceList = self::DEFAULT_PRICE_LIST)
+    {
         $shipmentMethodTransfer = (new ShipmentMethodBuilder($overrideShipmentMethod))->build();
         $shipmentMethodTransfer = $this->assertCarrier($shipmentMethodTransfer, $overrideCarrier);
 
@@ -78,23 +64,10 @@ class ShipmentMethodDataHelper extends Module
             }
         }
         $shipmentMethodTransfer->setPrices($moneyValueTransferCollection);
-        $storeRelationTransfer = (new StoreRelationTransfer())->setIdStores($idStoreList);
-        $shipmentMethodTransfer->setStoreRelation($storeRelationTransfer);
 
-        $idShipmentMethod = $this->getShipmentFacade()->createMethod($shipmentMethodTransfer);
-        $shipmentMethodTransfer->setIdShipmentMethod($idShipmentMethod);
+        $this->getShipmentFacade()->createMethod($shipmentMethodTransfer);
 
         return $shipmentMethodTransfer;
-    }
-
-    /**
-     * @return void
-     */
-    public function ensureShipmentMethodTableIsEmpty(): void
-    {
-        SpyShipmentMethodPriceQuery::create()->deleteAll();
-        SpyShipmentMethodStoreQuery::create()->deleteAll();
-        SpyShipmentMethodQuery::create()->deleteAll();
     }
 
     /**
@@ -103,19 +76,14 @@ class ShipmentMethodDataHelper extends Module
      *
      * @return \Generated\Shared\Transfer\ShipmentMethodTransfer
      */
-    protected function assertCarrier(ShipmentMethodTransfer $shipmentMethodTransfer, array $overrideCarrier): ShipmentMethodTransfer
+    protected function assertCarrier(ShipmentMethodTransfer $shipmentMethodTransfer, array $overrideCarrier)
     {
-        if ($shipmentMethodTransfer->getFkShipmentCarrier()) {
-            $shipmentCarrierEntity = SpyShipmentCarrierQuery::create()->findOneByIdShipmentCarrier($shipmentMethodTransfer->getFkShipmentCarrier());
-
-            if ($shipmentCarrierEntity) {
-                return $shipmentMethodTransfer->setCarrierName($shipmentCarrierEntity->getName());
-            }
+        if ($shipmentMethodTransfer->getFkShipmentCarrier() !== null) {
+            return $shipmentMethodTransfer;
         }
 
         $shipmentCarrierTransfer = $this->getShipmentCarrierDataHelper()->haveShipmentCarrier($overrideCarrier);
         $shipmentMethodTransfer->setFkShipmentCarrier($shipmentCarrierTransfer->getIdShipmentCarrier());
-        $shipmentMethodTransfer->setCarrierName($shipmentCarrierTransfer->getName());
 
         return $shipmentMethodTransfer;
     }
@@ -133,7 +101,7 @@ class ShipmentMethodDataHelper extends Module
      *
      * @return int
      */
-    protected function getIdCurrencyByIsoCode(string $currencyIsoCode): int
+    protected function getIdCurrencyByIsoCode($currencyIsoCode)
     {
         if (!isset(static::$idCurrencyCache[$currencyIsoCode])) {
             static::$idCurrencyCache[$currencyIsoCode] = $this->getCurrencyFacade()
@@ -149,7 +117,7 @@ class ShipmentMethodDataHelper extends Module
      *
      * @return int
      */
-    protected function getIdStoreByName(string $storeName): int
+    protected function getIdStoreByName($storeName)
     {
         if (static::$idStoreCache === null) {
             $this->loadStoreCache();
@@ -161,7 +129,7 @@ class ShipmentMethodDataHelper extends Module
     /**
      * @return void
      */
-    protected function loadStoreCache(): void
+    protected function loadStoreCache()
     {
         static::$idStoreCache = [];
         foreach ($this->getStoreFacade()->getAllStores() as $storeTransfer) {
@@ -172,7 +140,7 @@ class ShipmentMethodDataHelper extends Module
     /**
      * @return \Spryker\Zed\Currency\Business\CurrencyFacadeInterface
      */
-    protected function getCurrencyFacade(): CurrencyFacadeInterface
+    protected function getCurrencyFacade()
     {
         return $this->getLocator()->currency()->facade();
     }
@@ -180,7 +148,7 @@ class ShipmentMethodDataHelper extends Module
     /**
      * @return \Spryker\Zed\Store\Business\StoreFacadeInterface
      */
-    protected function getStoreFacade(): StoreFacadeInterface
+    protected function getStoreFacade()
     {
         return $this->getLocator()->store()->facade();
     }
@@ -188,7 +156,7 @@ class ShipmentMethodDataHelper extends Module
     /**
      * @return \Spryker\Zed\Shipment\Business\ShipmentFacadeInterface
      */
-    protected function getShipmentFacade(): ShipmentFacadeInterface
+    protected function getShipmentFacade()
     {
         return $this->getLocator()->shipment()->facade();
     }

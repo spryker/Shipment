@@ -21,8 +21,6 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     public const COL_MAX_TAX_RATE = 'MaxTaxRate';
 
     /**
-     * {@inheritDoc}
-     *
      * @api
      *
      * @return \Orm\Zed\Shipment\Persistence\SpyShipmentCarrierQuery
@@ -33,8 +31,6 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @api
      *
      * @return \Orm\Zed\Shipment\Persistence\SpyShipmentMethodPriceQuery
@@ -45,8 +41,6 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @api
      *
      * @param int $idShipmentMethod
@@ -61,8 +55,16 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     }
 
     /**
-     * {@inheritDoc}
+     * @api
      *
+     * @return \Orm\Zed\Shipment\Persistence\SpyShipmentCarrierQuery
+     */
+    public function queryActiveCarriers()
+    {
+        return $this->queryCarriers()->filterByIsActive(true);
+    }
+
+    /**
      * @api
      *
      * @return \Orm\Zed\Shipment\Persistence\SpyShipmentMethodQuery
@@ -73,11 +75,7 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @api
-     *
-     * @deprecated Use {@link \Spryker\Zed\Shipment\Persistence\ShipmentRepositoryInterface::getActiveShipmentMethods()} instead.
      *
      * @return \Orm\Zed\Shipment\Persistence\SpyShipmentMethodQuery
      */
@@ -87,8 +85,21 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     }
 
     /**
-     * {@inheritDoc}
+     * @api
      *
+     * @param int $idMethod
+     *
+     * @return \Orm\Zed\Shipment\Persistence\SpyShipmentMethodQuery
+     */
+    public function queryMethodByIdMethod($idMethod)
+    {
+        $query = $this->queryMethods();
+        $query->filterByIdShipmentMethod($idMethod);
+
+        return $query;
+    }
+
+    /**
      * @api
      *
      * @param int $idShipmentMethod
@@ -106,8 +117,6 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @api
      *
      * @return \Orm\Zed\Shipment\Persistence\SpyShipmentMethodQuery
@@ -120,8 +129,6 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @api
      *
      * @param int $idShipmentMethod
@@ -136,8 +143,18 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     }
 
     /**
-     * {@inheritDoc}
+     * @api
      *
+     * @return \Orm\Zed\Shipment\Persistence\SpyShipmentMethodQuery
+     */
+    public function queryActiveMethodsWithMethodPricesAndCarrier()
+    {
+        return $this
+            ->queryMethodsWithMethodPricesAndCarrier()
+            ->filterByIsActive(true);
+    }
+
+    /**
      * @api
      *
      * @param int $idShipmentMethod
@@ -153,11 +170,7 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @api
-     *
-     * @deprecated Use {@link \Spryker\Zed\Shipment\Persistence\ShipmentRepositoryInterface::findTaxSetByShipmentMethodAndCountryIso2Code()} instead.
      *
      * @param int $idShipmentMethod
      * @param string $countryIso2Code
@@ -186,11 +199,7 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @api
-     *
-     * @deprecated Use {@link \Spryker\Zed\Shipment\Persistence\ShipmentRepositoryInterface::findShipmentTransfersByOrder()} instead.
      *
      * @param int $idSalesOrder
      *
@@ -200,16 +209,11 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
     {
         return $this->getFactory()
             ->createSalesShipmentQuery()
-            ->leftJoinWithSpySalesOrderItem()
             ->filterByFkSalesOrder($idSalesOrder);
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @api
-     *
-     * @deprecated Will be removed without replacement.
      *
      * @param string $carrierName
      * @param int|null $idCarrier
@@ -227,5 +231,17 @@ class ShipmentQueryContainer extends AbstractQueryContainer implements ShipmentQ
         }
 
         return $query;
+    }
+
+    /**
+     * @api
+     *
+     * @param int $idShipmentMethod
+     *
+     * @return \Orm\Zed\Shipment\Persistence\SpyShipmentMethodQuery
+     */
+    public function queryActiveShipmentMethodByIdShipmentMethod($idShipmentMethod)
+    {
+        return $this->queryActiveMethods()->filterByIdShipmentMethod($idShipmentMethod);
     }
 }

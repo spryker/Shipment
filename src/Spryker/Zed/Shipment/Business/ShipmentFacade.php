@@ -7,32 +7,25 @@
 
 namespace Spryker\Zed\Shipment\Business;
 
-use ArrayObject;
 use Generated\Shared\Transfer\CalculableObjectTransfer;
-use Generated\Shared\Transfer\MailTransfer;
+use Generated\Shared\Transfer\CheckoutResponseTransfer;
 use Generated\Shared\Transfer\OrderTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
 use Generated\Shared\Transfer\SaveOrderTransfer;
-use Generated\Shared\Transfer\ShipmentCarrierRequestTransfer;
 use Generated\Shared\Transfer\ShipmentCarrierTransfer;
-use Generated\Shared\Transfer\ShipmentGroupResponseTransfer;
-use Generated\Shared\Transfer\ShipmentGroupTransfer;
-use Generated\Shared\Transfer\ShipmentMethodPluginCollectionTransfer;
-use Generated\Shared\Transfer\ShipmentMethodsCollectionTransfer;
 use Generated\Shared\Transfer\ShipmentMethodTransfer;
-use Generated\Shared\Transfer\ShipmentTransfer;
 use Orm\Zed\Shipment\Persistence\SpyShipmentMethod;
+use Spryker\Shared\Shipment\ShipmentConstants;
 use Spryker\Zed\Kernel\Business\AbstractFacade;
 
 /**
  * @method \Spryker\Zed\Shipment\Business\ShipmentBusinessFactory getFactory()
- * @method \Spryker\Zed\Shipment\Persistence\ShipmentEntityManagerInterface getEntityManager()
  * @method \Spryker\Zed\Shipment\Persistence\ShipmentRepositoryInterface getRepository()
  */
 class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -48,7 +41,7 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -62,21 +55,7 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param \Generated\Shared\Transfer\ShipmentCarrierRequestTransfer $shipmentCarrierRequestTransfer
-     *
-     * @return \Generated\Shared\Transfer\ShipmentCarrierTransfer|null
-     */
-    public function findShipmentCarrier(ShipmentCarrierRequestTransfer $shipmentCarrierRequestTransfer): ?ShipmentCarrierTransfer
-    {
-        return $this->getRepository()->findShipmentCarrier($shipmentCarrierRequestTransfer);
-    }
-
-    /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -84,27 +63,29 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
      */
     public function getMethods()
     {
-        return $this->getRepository()->getActiveShipmentMethods();
+        return $this->getFactory()
+            ->createMethod()
+            ->getShipmentMethodTransfers();
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
      * @param \Generated\Shared\Transfer\ShipmentMethodTransfer $methodTransfer
      *
-     * @return int|null
+     * @return int
      */
-    public function createMethod(ShipmentMethodTransfer $methodTransfer): ?int
+    public function createMethod(ShipmentMethodTransfer $methodTransfer)
     {
-        return $this->getFactory()
-            ->createShipmentMethodCreator()
-            ->createShipmentMethod($methodTransfer);
+        $methodModel = $this->getFactory()->createMethod();
+
+        return $methodModel->create($methodTransfer);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -115,29 +96,28 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
     public function findMethodById($idShipmentMethod)
     {
         return $this->getFactory()
-            ->createShipmentMethodReader()
-            ->findShipmentMethodById($idShipmentMethod);
+            ->createMethod()
+            ->findShipmentMethodTransferById($idShipmentMethod);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
      * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
      *
-     * @return \Generated\Shared\Transfer\ShipmentMethodsCollectionTransfer
+     * @return \Generated\Shared\Transfer\ShipmentMethodsTransfer
      */
-    public function getAvailableMethodsByShipment(QuoteTransfer $quoteTransfer): ShipmentMethodsCollectionTransfer
+    public function getAvailableMethods(QuoteTransfer $quoteTransfer)
     {
-        return $this
-            ->getFactory()
-            ->createMethodReader()
-            ->getAvailableMethodsByShipment($quoteTransfer);
+        $methodModel = $this->getFactory()->createMethod();
+
+        return $methodModel->getAvailableMethods($quoteTransfer);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -148,13 +128,27 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
      */
     public function findAvailableMethodById($idShipmentMethod, QuoteTransfer $quoteTransfer)
     {
-        return $this->getFactory()
-            ->createMethodReader()
-            ->findAvailableMethodById($idShipmentMethod, $quoteTransfer);
+        return $this->getFactory()->createMethod()->findAvailableMethodById($idShipmentMethod, $quoteTransfer);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
+     *
+     * @api
+     *
+     * @param int $idMethod
+     *
+     * @return \Generated\Shared\Transfer\ShipmentMethodTransfer
+     */
+    public function getShipmentMethodTransferById($idMethod)
+    {
+        $methodModel = $this->getFactory()->createMethod();
+
+        return $methodModel->getShipmentMethodTransferById($idMethod);
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * @api
      *
@@ -164,11 +158,13 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
      */
     public function hasMethod($idMethod)
     {
-        return $this->getRepository()->hasShipmentMethodByIdShipmentMethod($idMethod);
+        $methodModel = $this->getFactory()->createMethod();
+
+        return $methodModel->hasMethod($idMethod);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -178,13 +174,13 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
      */
     public function deleteMethod($idMethod)
     {
-        return $this->getFactory()
-            ->createShipmentMethodDeleter()
-            ->deleteShipmentMethod($idMethod);
+        $methodModel = $this->getFactory()->createMethod();
+
+        return $methodModel->deleteMethod($idMethod);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -194,13 +190,13 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
      */
     public function updateMethod(ShipmentMethodTransfer $methodTransfer)
     {
-        return $this->getFactory()
-            ->createShipmentMethodUpdater()
-            ->updateShipmentMethod($methodTransfer);
+        $methodModel = $this->getFactory()->createMethod();
+
+        return $methodModel->updateMethod($methodTransfer);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -210,14 +206,30 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
      */
     public function calculateShipmentTaxRate(QuoteTransfer $quoteTransfer)
     {
-        $this->getFactory()
-            ->createShipmentTaxCalculatorStrategyResolver()
-            ->resolve($quoteTransfer->getItems())
-            ->recalculate($quoteTransfer);
+        $this->getFactory()->createShipmentTaxCalculator()->recalculate($quoteTransfer);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
+     *
+     * @api
+     *
+     * @deprecated Use saveOrderShipment() instead
+     *
+     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
+     * @param \Generated\Shared\Transfer\CheckoutResponseTransfer $checkoutResponse
+     *
+     * @return void
+     */
+    public function saveShipmentForOrder(QuoteTransfer $quoteTransfer, CheckoutResponseTransfer $checkoutResponse)
+    {
+        $this->getFactory()
+            ->createShipmentOrderSaver()
+            ->saveShipmentForOrder($quoteTransfer, $checkoutResponse);
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * @api
      *
@@ -229,13 +241,12 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
     public function saveOrderShipment(QuoteTransfer $quoteTransfer, SaveOrderTransfer $saveOrderTransfer)
     {
         $this->getFactory()
-            ->createCheckoutShipmentOrderSaverStrategyResolver()
-            ->resolve($quoteTransfer->getItems())
+            ->createCheckoutShipmentOrderSaver()
             ->saveOrderShipment($quoteTransfer, $saveOrderTransfer);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -245,11 +256,11 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
      */
     public function hydrateOrderShipment(OrderTransfer $orderTransfer)
     {
-        return $this->getFactory()->createMultipleShipmentOrderHydrate()->hydrateOrderWithShipment($orderTransfer);
+        return $this->getFactory()->createShipmentOrderHydrate()->hydrateOrderWithShipment($orderTransfer);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -264,7 +275,7 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -274,77 +285,23 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
      */
     public function isShipmentMethodActive($idShipmentMethod)
     {
-        return $this->getRepository()->hasActiveShipmentMethodByIdShipmentMethod($idShipmentMethod);
+        return $this->getFactory()->createMethod()->isShipmentMethodActive($idShipmentMethod);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
-     *
-     * @deprecated Use {@link \Spryker\Shared\Shipment\ShipmentConfig::SHIPMENT_EXPENSE_TYPE} instead.
      *
      * @return string
      */
     public function getShipmentExpenseTypeIdentifier()
     {
-        return $this->getFactory()->getConfig()->getShipmentExpenseType();
+        return ShipmentConstants::SHIPMENT_EXPENSE_TYPE;
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param int $idSalesShipment
-     *
-     * @return \Generated\Shared\Transfer\ShipmentTransfer|null
-     */
-    public function findShipmentById(int $idSalesShipment): ?ShipmentTransfer
-    {
-        return $this->getFactory()
-            ->createShipmentReader()
-            ->findShipmentById($idSalesShipment);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param \Generated\Shared\Transfer\ShipmentGroupTransfer $shipmentGroupTransfer
-     * @param \Generated\Shared\Transfer\OrderTransfer $orderTransfer
-     *
-     * @return \Generated\Shared\Transfer\ShipmentGroupResponseTransfer
-     */
-    public function saveShipment(ShipmentGroupTransfer $shipmentGroupTransfer, OrderTransfer $orderTransfer): ShipmentGroupResponseTransfer
-    {
-        return $this->getFactory()
-            ->createShipmentSaver()
-            ->saveShipment($shipmentGroupTransfer, $orderTransfer);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param \Generated\Shared\Transfer\ShipmentGroupTransfer $shipmentGroupTransfer
-     * @param bool[] $itemListUpdatedStatus
-     *
-     * @return \Generated\Shared\Transfer\ShipmentGroupTransfer
-     */
-    public function createShipmentGroupTransferWithListedItems(
-        ShipmentGroupTransfer $shipmentGroupTransfer,
-        array $itemListUpdatedStatus
-    ): ShipmentGroupTransfer {
-        return $this->getFactory()
-            ->createShipmentGroupCreator()
-            ->createShipmentGroupTransferWithListedItems($shipmentGroupTransfer, $itemListUpdatedStatus);
-    }
-
-    /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -355,80 +312,12 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
     public function filterObsoleteShipmentExpenses(CalculableObjectTransfer $calculableObjectTransfer): void
     {
         $this->getFactory()
-            ->createShipmentExpenseFilterStrategyResolver()
-            ->resolve($calculableObjectTransfer->getItems())
+            ->createShipmentExpenseFilter()
             ->filterObsoleteShipmentExpenses($calculableObjectTransfer);
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param int $idSalesOrder
-     * @param int $idSalesShipment
-     *
-     * @return \Generated\Shared\Transfer\ItemTransfer[]|\ArrayObject
-     */
-    public function findSalesOrderItemsIdsBySalesShipmentId(int $idSalesOrder, int $idSalesShipment): ArrayObject
-    {
-        return $this->getFactory()
-            ->createShipmentSalesOrderItemReader()
-            ->findSalesOrderItemsBySalesShipmentId($idSalesOrder, $idSalesShipment);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param \Generated\Shared\Transfer\QuoteTransfer $quoteTransfer
-     *
-     * @return \Generated\Shared\Transfer\QuoteTransfer
-     */
-    public function expandQuoteWithShipmentGroups(QuoteTransfer $quoteTransfer): QuoteTransfer
-    {
-        return $this->getFactory()
-            ->createQuoteShipmentExpander()
-            ->expandQuoteWithShipmentGroups($quoteTransfer);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param \Generated\Shared\Transfer\MailTransfer $mailTransfer
-     * @param \Generated\Shared\Transfer\OrderTransfer $orderTransfer
-     *
-     * @return \Generated\Shared\Transfer\MailTransfer
-     */
-    public function expandOrderMailTransfer(MailTransfer $mailTransfer, OrderTransfer $orderTransfer): MailTransfer
-    {
-        return $this->getFactory()
-            ->createShipmentOrderMailExpander()
-            ->expandOrderMailTransfer($mailTransfer, $orderTransfer);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param array $events
-     * @param iterable|\Generated\Shared\Transfer\ItemTransfer[] $orderItemTransfers
-     *
-     * @return array
-     */
-    public function groupEventsByShipment(array $events, iterable $orderItemTransfers): array
-    {
-        return $this->getFactory()
-            ->createShipmentEventGrouper()
-            ->groupEventsByShipment($events, $orderItemTransfers);
-    }
-
-    /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      *
      * @api
      *
@@ -440,92 +329,5 @@ class ShipmentFacade extends AbstractFacade implements ShipmentFacadeInterface
     {
         return $this->getRepository()
             ->isShipmentMethodUniqueForCarrier($shipmentMethodTransfer);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param string $shipmentMethodName
-     *
-     * @return \Generated\Shared\Transfer\ShipmentMethodTransfer|null
-     */
-    public function findShipmentMethodByName(string $shipmentMethodName): ?ShipmentMethodTransfer
-    {
-        return $this->getRepository()
-            ->findShipmentMethodByName($shipmentMethodName);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param string $shipmentMethodKey
-     *
-     * @return \Generated\Shared\Transfer\ShipmentMethodTransfer|null
-     */
-    public function findShipmentMethodByKey(string $shipmentMethodKey): ?ShipmentMethodTransfer
-    {
-        return $this->getRepository()
-            ->findShipmentMethodByKey($shipmentMethodKey);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @return \Generated\Shared\Transfer\ShipmentMethodPluginCollectionTransfer
-     */
-    public function getShipmentMethodPlugins(): ShipmentMethodPluginCollectionTransfer
-    {
-        return $this->getFactory()->createShipmentMethodPluginReader()->getShipmentMethodPlugins();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @return \Generated\Shared\Transfer\ShipmentCarrierTransfer[]
-     */
-    public function getActiveShipmentCarriers(): array
-    {
-        return $this->getRepository()->getActiveShipmentCarriers();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param \Generated\Shared\Transfer\CalculableObjectTransfer $calculableObjectTransfer
-     *
-     * @return \Generated\Shared\Transfer\CalculableObjectTransfer
-     */
-    public function calculateShipmentTaxRateByCalculableObject(CalculableObjectTransfer $calculableObjectTransfer): CalculableObjectTransfer
-    {
-        return $this->getFactory()
-            ->createShipmentTaxCalculatorStrategyResolver()
-            ->resolve($calculableObjectTransfer->getItems())
-            ->recalculateByCalculableObject($calculableObjectTransfer);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     *
-     * @param \Generated\Shared\Transfer\CalculableObjectTransfer $calculableObjectTransfer
-     *
-     * @return void
-     */
-    public function calculateShipmentTotal(CalculableObjectTransfer $calculableObjectTransfer): void
-    {
-        $this->getFactory()
-            ->createShipmentTotalCalculator()
-            ->calculateShipmentTotal($calculableObjectTransfer);
     }
 }
